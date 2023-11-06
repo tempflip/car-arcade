@@ -2,7 +2,7 @@ import { GAMELOOP } from './gameLoop.js';
 
 class Car {
     hPos = 100;
-    speed = 10;
+    speed = 0;
     roadPos = 0;
     turnSpeed = 1;  
     
@@ -24,12 +24,18 @@ class Game {
         this.startTime = Date.now();
         this.player = new Car();
 
-        let oc = new Car();
-        oc.roadPos = 150;
-        oc.speed = 9;
-        oc.hPos = 150;
+        let oc1 = new Car();
+        oc1.roadPos = 150;
+        oc1.speed = 9;
+        oc1.hPos = 150;
 
-        this.otherCars.push(oc);
+        let oc2 = new Car();
+        oc2.roadPos = 300;
+        oc2.speed = 11;
+        oc2.hPos = 100;
+
+        this.otherCars.push(oc1);
+        this.otherCars.push(oc2);
     }
 
     get t() {
