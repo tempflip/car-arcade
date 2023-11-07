@@ -1,17 +1,5 @@
-import { GAMELOOP } from './gameLoop.js';
-
-class Car {
-    hPos = 100;
-    speed = 0;
-    roadPos = 0;
-    turnSpeed = 1;  
-    
-    upsert(currentT, previousT) {
-        let movedSinceLast = Math.floor((currentT - previousT) * this.speed);
-        console.log('##', currentT,previousT, movedSinceLast);
-        this.roadPos = this.roadPos + movedSinceLast;
-    }
-}
+import { GameLoop } from './gameLoop.js';
+import { PlayerCar, OtherCar, StartStripe, FinishStripe } from './entities.js';
 
 class Game {
     startTime;
@@ -19,17 +7,25 @@ class Game {
     lastUpsert = 0;
 
     otherCars = [];
+    staticEntities = [];
+    winEntity;
 
     constructor() {
         this.startTime = Date.now();
-        this.player = new Car();
+        this.player = new PlayerCar();
+        let finishStripe = new FinishStripe(100);
 
-        let oc1 = new Car();
+        this.staticEntities.push(new StartStripe());
+        this.staticEntities.push(finishStripe);
+        this.winEntity = finishStripe;
+
+
+        let oc1 = new OtherCar();
         oc1.roadPos = 150;
         oc1.speed = 9;
         oc1.hPos = 150;
 
-        let oc2 = new Car();
+        let oc2 = new OtherCar();
         oc2.roadPos = 300;
         oc2.speed = 11;
         oc2.hPos = 100;
@@ -41,10 +37,6 @@ class Game {
     get t() {
         return (Date.now() - this.startTime) / 1000;
     }
-
-    // get roadPos() {
-    // return Math.floor(this.t * this.speed);
-    // }
 
     turn(isRight) {
         if (isRight) {
@@ -68,6 +60,10 @@ class Game {
         this.lastUpsert = tt;
     }
 
+    evalWin() {
+        return this.winEntity.evalWin(this);
+    }
+
     speedUp(isUp) {
         if (isUp) {
             this.player.speed++;
@@ -75,8 +71,6 @@ class Game {
             this.player.speed--;
         }
     }
-
-
 };
 
 const turn = (isRight) => (game) => {
@@ -98,6 +92,7 @@ const main = () => {
     const canvas = document.querySelector('#can');
     const ctx = canvas.getContext('2d');
     let game = new Game();
+    let gameLoop = new GameLoop(game, ctx);
 
     document.addEventListener('keydown', (ev) => {
         if (!KEYMAP[ev.key]) return;
@@ -107,6 +102,14 @@ const main = () => {
         game.resetTurn();
     });
 
-    setInterval(GAMELOOP.gameLoop(game, ctx), 300);
+    let gameInterval = setInterval(()=>{ gameLoop.gameLoop(); }, 100);
+    gameLoop.passInterval(gameInterval);
+
+
+    // if (GAMELOOP.evalWin(game)) {
+    //     clearInterval(gameInterval);
+    //     console.log("%%@$@$@DSD im won");
+    // }
+    
 }
 main();
